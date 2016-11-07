@@ -12,7 +12,11 @@ import {
   View,
   ListView,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+  Animated,
+  Easing
 } from 'react-native';
 
 export default class homeCenterApp extends Component {
@@ -21,12 +25,19 @@ export default class homeCenterApp extends Component {
 
     this.state = {
       hydrometriesJSON: [],
+      spinValue: new Animated.Value(0),
       isLoading: true
     };
   }
 
   _getHomeHydrometries() {
     console.log('_getHomeHydrometries');
+    this.state.spinValue.setValue(0);
+    Animated.timing(this.state.spinValue, {
+        toValue: 100,
+        easing: Easing.linear,
+        duration: 1000
+    }).start(() => console.log('animation complete'));
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
     getHomeHydrometries() // fetch() retourne une Promise
       .then(json => this.setState({
@@ -58,14 +69,26 @@ export default class homeCenterApp extends Component {
     );
   }
   renderResults() {
+    const getStartValue = () => '0deg'
+    const getEndValue = () => '-360deg'
 
+    const spin = this.state.spinValue.interpolate({
+       inputRange: [0, 100],
+       outputRange: [getStartValue(), getEndValue()]
+     })
 
     return (
       <View style={styles.container} >
-        <View>
+        <View style={styles.header}>
           <Text style={styles.welcome}>
-            Welcome to SurionA Home center !
+            SurionA Home center
           </Text>
+          <TouchableOpacity style={styles.buttonRefresh} onPress={this._getHomeHydrometries.bind(this)}>
+            <Animated.Image
+              style={{width: 30, height: 30, transform: [{rotate: spin}]}}
+              source={require('./refresh.png')}
+            />
+          </TouchableOpacity>
         </View>
         <View style={styles.subheader}>
           <Text style={styles.currentHydo}>Current temperature: &nbsp;
@@ -127,6 +150,14 @@ const styles = StyleSheet.create({
     color: '#F5D785',
     margin: 10,
   },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    justifyContent: 'space-between',
+    marginRight: 10,
+    marginLeft: 10
+  },
   subheader: {
     alignSelf: 'stretch',
     backgroundColor: '#314262',
@@ -141,6 +172,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: '#F5D785',
     paddingBottom: 15
+  },
+  buttonRefresh: {
+    width: 30,
+    height: 30
   },
   instructions: {
     textAlign: 'center',
