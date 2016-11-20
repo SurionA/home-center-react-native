@@ -1,5 +1,5 @@
-const rootEndpoint = 'http://127.0.0.1/api';
+import * as config from './config';
 
 export const getHomeHydrometries = () =>
-  fetch(`${rootEndpoint}/hydrometries`)
+  fetch(`${config.HYDROMETRIES_API_URL}/hydrometries`)
     .then((response) => response.json())
