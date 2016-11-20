@@ -1,4 +1,4 @@
-const rootEndpoint = 'http://home.suriona.com/home-monitor/api';
+const rootEndpoint = 'http://127.0.0.1/api';
 
 export const getHomeHydrometries = () =>
   fetch(`${rootEndpoint}/hydrometries`)

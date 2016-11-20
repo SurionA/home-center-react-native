@@ -3,11 +3,14 @@
  * https://github.com/facebook/react-native
  * @flow
  */
-import { getHomeHydrometries } from './homeapi'
+import { getHomeHydrometries } from './homeapi';
+import io from 'socket.io-client/socket.io'
+
 import React, { Component } from 'react';
 import {
   AppRegistry,
   StyleSheet,
+  StatusBar,
   Text,
   View,
   ListView,
@@ -22,11 +25,13 @@ import {
 export default class homeCenterApp extends Component {
   constructor(props) {
     super(props);
-
+    this.socket = io('http://home.suriona.com', { path: '/home-monitor/socket/hydrometries/socket.io', transports: ['websocket'] });
     this.state = {
       hydrometriesJSON: [],
       spinValue: new Animated.Value(0),
-      isLoading: true
+      isLoading: true,
+      socketStatus: 'Not connected',
+      nbCo: 0
     };
   }
 
@@ -51,26 +56,40 @@ export default class homeCenterApp extends Component {
 
   componentDidMount() {
     console.log('componentDidMount');
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+
     this._getHomeHydrometries();
+    this.socket.on('connect', () => {
+      this.setState({
+        socketStatus: 'Connected'
+      });
+    });
+
+    this.socket.on('hydrometry:save', (hydrometry) => {
+      this.state.hydrometriesJSON.unshift(hydrometry);
+      this.setState({
+        hydrometriesLIST: ds.cloneWithRows(this.state.hydrometriesJSON)
+      });
+    });
   }
 
   renderLoadingMessage() {
     return (
 
-      <View style={styles.loadingContainer}>
+      <View style={styles.container}>
         <ActivityIndicator
           animating={true}
           color={'#fff'}
           size={'small'}
           style={{margin: 15}} />
-          <Text style={{color: '#fff'}}>Contacting Unsplash</Text>
+        <Text style={{color: '#fff'}}>Loading</Text>
 
       </View>
     );
   }
   renderResults() {
     const getStartValue = () => '0deg'
-    const getEndValue = () => '-360deg'
+    const getEndValue = () => '360deg'
 
     const spin = this.state.spinValue.interpolate({
        inputRange: [0, 100],
@@ -79,6 +98,9 @@ export default class homeCenterApp extends Component {
 
     return (
       <View style={styles.container} >
+        <StatusBar
+          backgroundColor="#2E538F"
+        />
         <View style={styles.header}>
           <Text style={styles.welcome}>
             SurionA Home center
@@ -91,6 +113,11 @@ export default class homeCenterApp extends Component {
           </TouchableOpacity>
         </View>
         <View style={styles.subheader}>
+          <Text style={styles.currentHydo}>Socket Status: &nbsp;
+            <Text style={styles.hydroVal}>
+              {this.state.socketStatus}
+            </Text>
+          </Text>
           <Text style={styles.currentHydo}>Current temperature: &nbsp;
             <Text style={styles.hydroVal}>
               {this.state.hydrometriesJSON[0].inside_temperature}°C
