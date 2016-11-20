@@ -82,6 +82,23 @@ def enableSeparateBuildPerCPUArchitecture = false
  */
 def enableProguardInReleaseBuilds = false
 
+if(project.hasProperty("homeCenter.properties") && new File(project.property("homeCenter.properties")).exists()) {
+
+  Properties props = new Properties()
+  props.load(new FileInputStream(file(project.property("homeCenter.properties"))))
+
+  android {
+    signingConfigs {
+      release {
+        storeFile file(props['keystore'])
+        storePassword props['keystore.storePassword']
+        keyAlias props['keystore.keyAlias']
+        keyPassword props['keystore.keyPassword']
+      }
+    }
+  }
+}
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
@@ -94,6 +111,12 @@ android {
         versionName "1.0"
         ndk {
             abiFilters "armeabi-v7a", "x86"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
         }
     }
     splits {
