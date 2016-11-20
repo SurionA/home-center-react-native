@@ -36,7 +36,6 @@ export default class homeCenterApp extends Component {
   }
 
   _getHomeHydrometries() {
-    console.log('_getHomeHydrometries');
     this.state.spinValue.setValue(0);
     Animated.timing(this.state.spinValue, {
         toValue: 100,
@@ -44,7 +43,7 @@ export default class homeCenterApp extends Component {
         duration: 1000
     }).start(() => console.log('animation complete'));
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-    getHomeHydrometries() // fetch() retourne une Promise
+    getHomeHydrometries()
       .then(json => this.setState({
         hydrometriesJSON: json,
         hydrometriesLIST: ds.cloneWithRows(json),
@@ -76,13 +75,13 @@ export default class homeCenterApp extends Component {
   renderLoadingMessage() {
     return (
 
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator
           animating={true}
-          color={'#fff'}
-          size={'small'}
+          color={'#B6D9E5'}
+          size={'large'}
           style={{margin: 15}} />
-        <Text style={{color: '#fff'}}>Loading</Text>
+        <Text style={{color: '#B6D9E5'}}>Loading</Text>
 
       </View>
     );
@@ -170,6 +169,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#2E538F',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#314262',
   },
   welcome: {
     fontSize: 20,
