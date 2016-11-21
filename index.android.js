@@ -25,7 +25,7 @@ import {
 export default class homeCenterApp extends Component {
   constructor(props) {
     super(props);
-    this.socket = io('http://home.suriona.com', { path: '/home-monitor/socket/hydrometries/socket.io', transports: ['websocket'] });
+    this.socket = io('http://home.suriona.com', { path: '/home-center/socket/hydrometries/socket.io', transports: ['websocket'] });
     this.state = {
       hydrometriesJSON: [],
       spinValue: new Animated.Value(0),
